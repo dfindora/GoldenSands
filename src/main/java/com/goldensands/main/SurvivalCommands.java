@@ -2,8 +2,12 @@ package com.goldensands.main;
 
 import com.goldensands.config.ChestLocation;
 import com.goldensands.config.Region;
+import com.goldensands.config.RewardSet;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,6 +16,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import com.goldensands.util.VarCheck;
+
+import java.util.ArrayList;
 
 public class SurvivalCommands implements Listener, CommandExecutor
 {
@@ -31,14 +37,15 @@ public class SurvivalCommands implements Listener, CommandExecutor
         {
             if(args[0].equals("create"))
             {
-                if(args.length == 2)
+                if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
-
+                    Region region = new Region(args[1], Integer.parseInt(args[2]));
+                    plugin.getRegionConfig().addRegion(region);
                 }
                 else
                 {
                     sender.sendMessage(ChatColor.RED + "Invalid syntax. Correct Syntax: /" + command.getName()
-                            + " create <name>");
+                            + " create <name> <max-tiers>");
                 }
                 return true;
             }
@@ -46,7 +53,20 @@ public class SurvivalCommands implements Listener, CommandExecutor
             {
                 if(args.length == 2)
                 {
-
+                    Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                    for(ChestLocation chestLocation : region.getLocations())
+                    {
+                        Location location = chestLocation.getLocation();
+                        location.getBlock().setType(Material.CHEST);
+                        Chest chest = ((Chest)location.getBlock());
+                        int tierNum = (int)(Math.random() * (chestLocation.getTiers().size()));
+                        int rewardNum = (int)(Math.random() * (chestLocation.getTiers().get(tierNum).getRewards().size()));
+                        RewardSet chestInv = chestLocation.getTiers().get(tierNum).getRewards().get(rewardNum);
+                        for(ItemStack item : chestInv.getItems())
+                        {
+                            chest.getInventory().addItem(item);
+                        }
+                    }
                 }
                 else
                 {
@@ -105,7 +125,10 @@ public class SurvivalCommands implements Listener, CommandExecutor
             {
                 if(args.length == 4 && VarCheck.isInteger(args[2]) && VarCheck.isInteger(args[3]))
                 {
-
+                    Location location = ((Player)sender).getLocation();
+                    ChestLocation chestLocation = new ChestLocation(plugin.getRegionConfig().getRegionbyName(args[1]),
+                            location, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+                    plugin.getRegionConfig().getRegionbyName(args[1]).addLocation(chestLocation);
                 }
                 else
                 {
@@ -120,7 +143,17 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 {
                     if(!hasEmptyInventory((Player)sender))
                     {
-
+                        ArrayList<ItemStack> items = new ArrayList<>();
+                        for(ItemStack item : ((Player)sender).getInventory().getContents())
+                        {
+                            if(item != null)
+                            {
+                                items.add(item);
+                            }
+                        }
+                        RewardSet rewardSet = new RewardSet(items);
+                        plugin.getRegionConfig().getRegionbyName(args[2]).getTiers()
+                                .get(Integer.parseInt(args[2]) - 1).addRewards(rewardSet);
                     }
                     else
                     {
