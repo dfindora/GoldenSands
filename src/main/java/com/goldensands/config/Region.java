@@ -10,6 +10,11 @@ public class Region
     private final ArrayList<ChestLocation> locations;
     private final ArrayList<Tier> tiers;
 
+    /**
+     * Generates a blank Region.
+     * @param name - name of the region.
+     * @param maxTiers - maximum number of tiers. The region will generate empty tiers from 1 - maxTiers.
+     */
     public Region(String name, int maxTiers)
     {
         this.name = name;
@@ -19,6 +24,19 @@ public class Region
         {
             tiers.add(new Tier(i + 1));
         }
+    }
+
+    /**
+     * Deserialization constructor.
+     * @param name - name of the region.
+     * @param locations - all the locations currently in the region.
+     * @param tiers - all of the tiers with their respective RewardSets currently in the region.
+     */
+    public Region(String name, ArrayList<ChestLocation> locations, ArrayList<Tier> tiers)
+    {
+        this.name = name;
+        this.locations = locations;
+        this.tiers = tiers;
     }
 
     public String getName()

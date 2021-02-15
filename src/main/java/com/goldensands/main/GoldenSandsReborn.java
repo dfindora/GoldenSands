@@ -7,7 +7,7 @@ public class GoldenSandsReborn extends JavaPlugin
 {
     //Main command handler.
     private final SurvivalCommands survivalCommands = new SurvivalCommands(this);
-    private final ConfigParser configParser = new ConfigParser();
+    private final ConfigParser configParser = new ConfigParser(this);
 
     @Override
     public void onEnable()

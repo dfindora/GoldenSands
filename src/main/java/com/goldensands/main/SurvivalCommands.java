@@ -6,7 +6,6 @@ import com.goldensands.config.RewardSet;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import com.goldensands.util.VarCheck;
 
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 {
                     Region region = new Region(args[1], Integer.parseInt(args[2]));
                     plugin.getRegionConfig().addRegion(region);
+                    sender.sendMessage(ChatColor.GREEN + "Created a region by the name " + args[1] + ".");
                 }
                 else
                 {
@@ -97,6 +96,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         if(chestLocation != null)
                         {
                             region.removeLocation(chestLocation);
+                            plugin.getRegionConfig().writeRegionsToFile();
                         }
                         else
                         {
@@ -129,6 +129,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     ChestLocation chestLocation = new ChestLocation(plugin.getRegionConfig().getRegionbyName(args[1]),
                             location, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
                     plugin.getRegionConfig().getRegionbyName(args[1]).addLocation(chestLocation);
+                    plugin.getRegionConfig().writeRegionsToFile();
                 }
                 else
                 {
@@ -152,8 +153,16 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             }
                         }
                         RewardSet rewardSet = new RewardSet(items);
+
+                        System.out.println(plugin);
+                        System.out.println(plugin.getRegionConfig());
+                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]));
+                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]).getTiers());
+                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]).getTiers()
+                                .get(Integer.parseInt(args[2]) - 1));
                         plugin.getRegionConfig().getRegionbyName(args[2]).getTiers()
                                 .get(Integer.parseInt(args[2]) - 1).addRewards(rewardSet);
+                        plugin.getRegionConfig().writeRegionsToFile();
                     }
                     else
                     {

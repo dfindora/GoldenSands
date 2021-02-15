@@ -13,6 +13,12 @@ public class Tier
         this.rewards = new ArrayList<>();
     }
 
+    public Tier(int number, ArrayList<RewardSet> rewards)
+    {
+        this.number = number;
+        this.rewards = rewards;
+    }
+
     public int getNumber()
     {
         return number;
