@@ -1,0 +1,13 @@
+name: Techpoints
+version: 1.1.0
+author: cobra0798
+description: An assortment of useful utility commands for the Golden Sands minecraft server.
+main: com.goldensands.bukkit.main.GoldenSandsReborn
+
+commands:
+  goldensands:
+    usage: /<command>
+    description: The main survival command. do /<command> help for a list of commands.
+    aliases: gs
+    permission: goldensands.survival
+    permission-message: you don't have permission to use /<command>.
