@@ -13,6 +13,7 @@ public class GoldenSandsReborn extends JavaPlugin
     public void onEnable()
     {
         getCommand(survivalCommands.main).setExecutor(survivalCommands);
+        configParser.initialize();
     }
 
     @Override

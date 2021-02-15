@@ -57,7 +57,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     {
                         Location location = chestLocation.getLocation();
                         location.getBlock().setType(Material.CHEST);
-                        Chest chest = ((Chest)location.getBlock());
+                        Chest chest = (Chest)location.getBlock().getState();
                         int tierNum = (int)(Math.random() * (chestLocation.getTiers().size()));
                         int rewardNum = (int)(Math.random() * (chestLocation.getTiers().get(tierNum).getRewards().size()));
                         RewardSet chestInv = chestLocation.getTiers().get(tierNum).getRewards().get(rewardNum);
@@ -154,13 +154,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         }
                         RewardSet rewardSet = new RewardSet(items);
 
-                        System.out.println(plugin);
-                        System.out.println(plugin.getRegionConfig());
-                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]));
-                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]).getTiers());
-                        System.out.println(plugin.getRegionConfig().getRegionbyName(args[2]).getTiers()
-                                .get(Integer.parseInt(args[2]) - 1));
-                        plugin.getRegionConfig().getRegionbyName(args[2]).getTiers()
+                        plugin.getRegionConfig().getRegionbyName(args[1]).getTiers()
                                 .get(Integer.parseInt(args[2]) - 1).addRewards(rewardSet);
                         plugin.getRegionConfig().writeRegionsToFile();
                     }

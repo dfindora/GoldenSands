@@ -190,6 +190,7 @@ public class ConfigParser
                 return region;
             }
         }
+        assert true : "region " + name + " not found";
         return null;
     }
 }
