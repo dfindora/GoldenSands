@@ -1,8 +1,8 @@
-name: Techpoints
-version: 1.1.0
+name: GoldenSandsReborn
+version: 1.0.0
 author: cobra0798
 description: An assortment of useful utility commands for the Golden Sands minecraft server.
-main: com.goldensands.bukkit.main.GoldenSandsReborn
+main: com.goldensands.main.GoldenSandsReborn
 
 commands:
   goldensands:
