@@ -115,7 +115,7 @@ public class ConfigParser
                 jsonChestLocation.addProperty("z", location.getLocation().getZ());
                 jsonChestLocation.addProperty("tierStart", location.getTiers().get(0).getNumber());
                 jsonChestLocation.addProperty("tierEnd",
-                        location.getTiers().get(location.getTiers().size()).getNumber());
+                        location.getTiers().get(location.getTiers().size() - 1).getNumber());
                 jsonChestLocations.add(jsonChestLocation);
             }
             jsonRegion.add("locations", jsonChestLocations);
