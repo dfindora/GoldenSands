@@ -89,10 +89,12 @@ public class ConfigParser
         {
             for (File fileEntry : Objects.requireNonNull(dir.listFiles()))
             {
-                regions.add(gson.fromJson(new FileReader(fileEntry), Region.class));
+                FileReader fr = new FileReader(fileEntry);
+                regions.add(gson.fromJson(fr, Region.class));
+                fr.close();
             }
         }
-        catch (FileNotFoundException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -156,7 +158,9 @@ public class ConfigParser
             for(Region region : regions)
             {
                 regionName = region.getName();
-                gson.toJson(region, new FileWriter(dir + File.separator + regionName  + ".json"));
+                FileWriter fw = new FileWriter(dir + File.separator + regionName  + ".json");
+                gson.toJson(region, fw);
+                fw.close();
             }
         }
         catch (IOException e)
