@@ -10,13 +10,12 @@ public class FixedPage extends Page
     }
 
     @Override
-    ArrayList<String> buildPage(int pageNumber, ArrayList<String> page)
+    void buildPage(int pageNumber, ArrayList<String> page)
     {
-        for(int i = pageNumber * (this.pageLength - 1); i < pageNumber * pageLength; i++)
+        for(int i = this.pageLength * (pageNumber - 1); i < this.pageLength * pageNumber && i < entries.size(); i++)
         {
             page.add(entries.get(i));
         }
-        return page;
     }
 
     @Override

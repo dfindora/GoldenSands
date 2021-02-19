@@ -1,7 +1,6 @@
 package com.goldensands.util;
 
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 
@@ -28,7 +27,7 @@ public abstract class Page
         {
             currentPage--;
             page.add(ChatColor.AQUA + "Showing page " + currentPage + " of " + getMaxPages());
-            page = buildPage(currentPage, page);
+            buildPage(currentPage, page);
         }
         else
         {
@@ -44,7 +43,7 @@ public abstract class Page
         if(currentPage > getMaxPages())
         {
             currentPage++;
-            page = buildPage(currentPage, page);
+            buildPage(currentPage, page);
         }
         else
         {
@@ -57,10 +56,10 @@ public abstract class Page
     public ArrayList<String> pageAt(int pageNumber)
     {
         ArrayList<String> page = new ArrayList<>();
-        if(pageNumber > getMaxPages())
+        if(pageNumber >= getMaxPages())
         {
             currentPage = pageNumber;
-            page = buildPage(currentPage, page);
+            buildPage(currentPage, page);
         }
         else
         {
@@ -70,7 +69,7 @@ public abstract class Page
         return page;
     }
 
-    abstract ArrayList<String> buildPage(int pageNumber, ArrayList<String> page);
+    abstract void buildPage(int pageNumber, ArrayList<String> page);
 
     abstract int getMaxPages();
 }

@@ -16,7 +16,7 @@ public class DynamicPage extends Page
     }
 
     @Override
-    ArrayList<String> buildPage(int pageNumber, ArrayList<String> page)
+    void buildPage(int pageNumber, ArrayList<String> page)
     {
         //find the start of the page
         int startIndex = 0;
@@ -42,7 +42,6 @@ public class DynamicPage extends Page
         {
             page.add(entries.get(i));
         }
-        return page;
     }
 
     @Override

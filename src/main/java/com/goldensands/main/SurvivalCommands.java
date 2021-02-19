@@ -126,16 +126,11 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     }
                     page = new FixedPage(regions, 5);
                 }
-                else
-                {
-                    sender.sendMessage(ChatColor.RED
-                            + "Invalid Syntax. Correct Syntax: /gs list");
-                }
                 //gs list <region> - list tier range first, then all locations within a region
-                if (args.length == 2)
+                else if (args.length == 2)
                 {
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
-                    sender.sendMessage(ChatColor.YELLOW + "Locations for " + region.getName() + "tiers "
+                    sender.sendMessage(ChatColor.YELLOW + "Locations for " + region.getName() + " tiers "
                             + region.getTiers().get(0).getNumber() + " to "
                             + region.getTiers().get(region.getTiers().size() - 1).getNumber());
 
@@ -149,13 +144,8 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     }
                     page = new FixedPage(locations, 5);
                 }
-                else
-                {
-                    sender.sendMessage(ChatColor.RED
-                            + "Invalid Syntax. Correct Syntax: /gs locationlist <region>");
-                }
                 //gs list <region> <tier> - list rewardsets
-                if(args.length == 3 && VarCheck.isInteger(args[2]))
+                else if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
                     //build list
                     Tier tier = plugin.getRegionConfig().getRegionbyName(args[1]).getTiers()
@@ -179,12 +169,13 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 else
                 {
                     sender.sendMessage(ChatColor.RED + "Invalid Syntax. Correct Syntax: " +
-                            "/gs rewardslist <region> <tier>");
+                            "/gs list <region> <tier>");
                 }
                 if(page != null)
                 {
                     for(String pageString : page.pageAt(1))
                     {
+                        System.out.println("string: " + pageString);
                         sender.sendMessage(pageString);
                     }
                     if (senderPageHashMap.containsKey(sender))
@@ -235,6 +226,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 {
                     sender.sendMessage(ChatColor.RED + "You have not run a command to page through.");
                 }
+                return true;
             }
             else if(args[0].equals("help"))
             {
