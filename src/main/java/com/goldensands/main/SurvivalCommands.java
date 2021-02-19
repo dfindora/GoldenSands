@@ -112,57 +112,26 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
-            //gs list <previous|next|page number> - list all regions
+            //gs list - list all regions
             else if(args[0].equals("list"))
             {
-                //build list
-                ArrayList<String> regions = new ArrayList<>();
-                for(Region region : plugin.getRegionConfig().getRegions())
+                Page page = null;
+                if(args.length == 1)
                 {
-                    regions.add(ChatColor.GRAY + region.getName());
-                }
-                FixedPage page = new FixedPage(regions, 5);
-                if(senderPageHashMap.containsKey(sender))
-                {
-                    senderPageHashMap.replace(sender,page);
-                }
-                else
-                {
-                    senderPageHashMap.put(sender, page);
-                }
-                if(args[1].equals("previous"))
-                {
-                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
-                    for(String pageString : pageStrings)
+                    //build list
+                    ArrayList<String> regions = new ArrayList<>();
+                    for (Region region : plugin.getRegionConfig().getRegions())
                     {
-                        sender.sendMessage(pageString);
+                        regions.add(ChatColor.GRAY + region.getName());
                     }
-                }
-                else if(args[1].equals("next"))
-                {
-                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
-                    for(String pageString : pageStrings)
-                    {
-                        sender.sendMessage(pageString);
-                    }
-                }
-                else if(VarCheck.isInteger(args[1]))
-                {
-                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[1]));
-                    for(String pageString : pageStrings)
-                    {
-                        sender.sendMessage(pageString);
-                    }
+                    page = new FixedPage(regions, 5);
                 }
                 else
                 {
                     sender.sendMessage(ChatColor.RED
-                            + "Invalid Syntax. Correct Syntax: /gs list <previous|next|page number>");
+                            + "Invalid Syntax. Correct Syntax: /gs list");
                 }
-            }
-            //gs locationlist <region> <previous|next|page number> - list tier range first, then all locations within a region
-            else if(args[0].equals("locationlist"))
-            {
+                //gs list <region> - list tier range first, then all locations within a region
                 if (args.length == 2)
                 {
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
@@ -178,51 +147,14 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         locations.add(ChatColor.YELLOW + "(" + location.getX() + ", " + location.getY() + ", "
                                 + location.getZ() + ")");
                     }
-                    FixedPage page = new FixedPage(locations, 5);
-                    if (senderPageHashMap.containsKey(sender))
-                    {
-                        senderPageHashMap.replace(sender, page);
-                    } else
-                    {
-                        senderPageHashMap.put(sender, page);
-                    }
+                    page = new FixedPage(locations, 5);
                 }
                 else
                 {
-                    if(args[2].equals("previous"))
-                    {
-                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
-                        for(String pageString : pageStrings)
-                        {
-                            sender.sendMessage(pageString);
-                        }
-                    }
-                    else if(args[2].equals("next"))
-                    {
-                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
-                        for(String pageString : pageStrings)
-                        {
-                            sender.sendMessage(pageString);
-                        }
-                    }
-                    else if(VarCheck.isInteger(args[2]))
-                    {
-                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[2]));
-                        for(String pageString : pageStrings)
-                        {
-                            sender.sendMessage(pageString);
-                        }
-                    }
-                    else
-                    {
-                        sender.sendMessage(ChatColor.RED
-                                + "Invalid Syntax. Correct Syntax: /gs locationlist <region> <previous|next|page number>");
-                    }
+                    sender.sendMessage(ChatColor.RED
+                            + "Invalid Syntax. Correct Syntax: /gs locationlist <region>");
                 }
-            }
-            //gs rewardslist <region> <tier> <previous|next|page number> - list rewardsets
-            else if(args[0].equals("rewardslist"))
-            {
+                //gs list <region> <tier> - list rewardsets
                 if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
                     //build list
@@ -242,19 +174,34 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     }
                     messages.remove(messages.size() - 1);
 
-                    DynamicPage page = new DynamicPage(messages, 0, seperator);
-                    if(senderPageHashMap.containsKey(sender))
+                    page = new DynamicPage(messages, 0, seperator);
+                }
+                else
+                {
+                    sender.sendMessage(ChatColor.RED + "Invalid Syntax. Correct Syntax: " +
+                            "/gs rewardslist <region> <tier>");
+                }
+                if(page != null)
+                {
+                    for(String pageString : page.pageAt(1))
+                    {
+                        sender.sendMessage(pageString);
+                    }
+                    if (senderPageHashMap.containsKey(sender))
                     {
                         senderPageHashMap.replace(sender, page);
-                    }
-                    else
+                    } else
                     {
                         senderPageHashMap.put(sender, page);
                     }
                 }
-                else if(args.length == 4 && VarCheck.isInteger(args[2]))
+                return true;
+            }
+            else if(args[0].equals("page"))
+            {
+                if(senderPageHashMap.containsKey(sender))
                 {
-                    if(args[3].equals("previous"))
+                    if(args[1].equals("previous"))
                     {
                         ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
                         for(String pageString : pageStrings)
@@ -262,7 +209,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             sender.sendMessage(pageString);
                         }
                     }
-                    else if(args[3].equals("next"))
+                    else if(args[1].equals("next"))
                     {
                         ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
                         for(String pageString : pageStrings)
@@ -270,9 +217,9 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             sender.sendMessage(pageString);
                         }
                     }
-                    else if(VarCheck.isInteger(args[3]))
+                    else if(VarCheck.isInteger(args[1]))
                     {
-                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[3]));
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[1]));
                         for(String pageString : pageStrings)
                         {
                             sender.sendMessage(pageString);
@@ -280,11 +227,14 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     }
                     else
                     {
-                        sender.sendMessage(ChatColor.RED + "Invalid Syntax. Correct Syntax: " +
-                                "/gs rewardslist <region> <tier> <previous|next|page number>");
+                        sender.sendMessage(ChatColor.RED
+                                + "Invalid Syntax. Correct Syntax: /gs page <previous|next|page number>");
                     }
                 }
-                return true;
+                else
+                {
+                    sender.sendMessage(ChatColor.RED + "You have not run a command to page through.");
+                }
             }
             else if(args[0].equals("help"))
             {
