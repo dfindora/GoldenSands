@@ -12,6 +12,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import com.goldensands.util.VarCheck;
 
@@ -58,6 +59,10 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         Location location = chestLocation.getLocation();
                         location.getBlock().setType(Material.CHEST);
                         Chest chest = (Chest)location.getBlock().getState();
+                        if(!hasEmptyInventory(chest))
+                        {
+                            chest.getInventory().clear();
+                        }
                         int tierNum = (int)(Math.random() * (chestLocation.getTiers().size()));
                         int rewardNum = (int)(Math.random() * (chestLocation.getTiers().get(tierNum).getRewards().size()));
                         RewardSet chestInv = chestLocation.getTiers().get(tierNum).getRewards().get(rewardNum);
@@ -178,9 +183,9 @@ public class SurvivalCommands implements Listener, CommandExecutor
         }
         return false;
     }
-    public boolean hasEmptyInventory(Player player)
+    public boolean hasEmptyInventory(InventoryHolder inventory)
     {
-        for(ItemStack it : player.getInventory().getContents())
+        for(ItemStack it : inventory.getInventory().getContents())
         {
             if(it != null) return false;
         }
