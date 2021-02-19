@@ -1,8 +1,12 @@
 package com.goldensands.main;
 
+import com.goldensands.util.FixedPage;
+import com.goldensands.util.Page;
 import com.goldensands.config.ChestLocation;
 import com.goldensands.config.Region;
 import com.goldensands.config.RewardSet;
+import com.goldensands.config.Tier;
+import com.goldensands.util.DynamicPage;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,12 +20,15 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import com.goldensands.util.VarCheck;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SurvivalCommands implements Listener, CommandExecutor
 {
     private final GoldenSandsReborn plugin;
     String main = "goldensands";
+    HashMap<CommandSender, Page> senderPageHashMap = new HashMap<>();
 
     public SurvivalCommands(GoldenSandsReborn plugin)
     {
@@ -63,9 +70,35 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         {
                             chest.getInventory().clear();
                         }
-                        int tierNum = (int)(Math.random() * (chestLocation.getTiers().size()));
-                        int rewardNum = (int)(Math.random() * (chestLocation.getTiers().get(tierNum).getRewards().size()));
-                        RewardSet chestInv = chestLocation.getTiers().get(tierNum).getRewards().get(rewardNum);
+                        int[] tierNums = new int[100];
+                        for(int i = 0; i < 100; i++)
+                        {
+                            tierNums[i] = (int)(Math.random() * (chestLocation.getTiers().size()));
+                        }
+
+                        int[] rewardNums = new int[100];
+                        for(int i = 0; i < 100; i++)
+                        {
+                            rewardNums[i] = (int)(Math.random() * (chestLocation.getTiers().get(tierNums[0]).getRewards().size()));
+                        }
+                        StringBuilder tnPrint = new StringBuilder("TierNums(" + chestLocation.getTiers().size() + "): [");
+                        for(int tierNum : tierNums)
+                        {
+                            tnPrint.append(tierNum).append(", ");
+                        }
+                        tnPrint.append("]");
+                        System.out.println(tnPrint.toString());
+
+                        StringBuilder rnPrint = new StringBuilder("RewardNums(" + tierNums[0] + ", "
+                                + chestLocation.getTiers().get(tierNums[0]).getRewards().size() + "): [");
+                        for(int rewardNum : rewardNums)
+                        {
+                            rnPrint.append(rewardNum).append(", ");
+                        }
+                        rnPrint.append("]");
+                        System.out.println(rnPrint.toString());
+
+                        RewardSet chestInv = chestLocation.getTiers().get(tierNums[0]).getRewards().get(rewardNums[0]);
                         for(ItemStack item : chestInv.getItems())
                         {
                             chest.getInventory().addItem(item);
@@ -79,8 +112,178 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
+            //gs list <previous|next|page number> - list all regions
             else if(args[0].equals("list"))
             {
+                //build list
+                ArrayList<String> regions = new ArrayList<>();
+                for(Region region : plugin.getRegionConfig().getRegions())
+                {
+                    regions.add(ChatColor.GRAY + region.getName());
+                }
+                FixedPage page = new FixedPage(regions, 5);
+                if(senderPageHashMap.containsKey(sender))
+                {
+                    senderPageHashMap.replace(sender,page);
+                }
+                else
+                {
+                    senderPageHashMap.put(sender, page);
+                }
+                if(args[1].equals("previous"))
+                {
+                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
+                    for(String pageString : pageStrings)
+                    {
+                        sender.sendMessage(pageString);
+                    }
+                }
+                else if(args[1].equals("next"))
+                {
+                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
+                    for(String pageString : pageStrings)
+                    {
+                        sender.sendMessage(pageString);
+                    }
+                }
+                else if(VarCheck.isInteger(args[1]))
+                {
+                    ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[1]));
+                    for(String pageString : pageStrings)
+                    {
+                        sender.sendMessage(pageString);
+                    }
+                }
+                else
+                {
+                    sender.sendMessage(ChatColor.RED
+                            + "Invalid Syntax. Correct Syntax: /gs list <previous|next|page number>");
+                }
+            }
+            //gs locationlist <region> <previous|next|page number> - list tier range first, then all locations within a region
+            else if(args[0].equals("locationlist"))
+            {
+                if (args.length == 2)
+                {
+                    Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                    sender.sendMessage(ChatColor.YELLOW + "Locations for " + region.getName() + "tiers "
+                            + region.getTiers().get(0).getNumber() + " to "
+                            + region.getTiers().get(region.getTiers().size() - 1).getNumber());
+
+                    //build list
+                    ArrayList<String> locations = new ArrayList<>();
+                    for (ChestLocation chestLocation : region.getLocations())
+                    {
+                        Location location = chestLocation.getLocation();
+                        locations.add(ChatColor.YELLOW + "(" + location.getX() + ", " + location.getY() + ", "
+                                + location.getZ() + ")");
+                    }
+                    FixedPage page = new FixedPage(locations, 5);
+                    if (senderPageHashMap.containsKey(sender))
+                    {
+                        senderPageHashMap.replace(sender, page);
+                    } else
+                    {
+                        senderPageHashMap.put(sender, page);
+                    }
+                }
+                else
+                {
+                    if(args[2].equals("previous"))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else if(args[2].equals("next"))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else if(VarCheck.isInteger(args[2]))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[2]));
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED
+                                + "Invalid Syntax. Correct Syntax: /gs locationlist <region> <previous|next|page number>");
+                    }
+                }
+            }
+            //gs rewardslist <region> <tier> <previous|next|page number> - list rewardsets
+            else if(args[0].equals("rewardslist"))
+            {
+                if(args.length == 3 && VarCheck.isInteger(args[2]))
+                {
+                    //build list
+                    Tier tier = plugin.getRegionConfig().getRegionbyName(args[1]).getTiers()
+                            .get(Integer.parseInt(args[2]));
+                    String seperator = "---%%%---";
+                    ArrayList<String> messages = new ArrayList<>();
+                    for(RewardSet rewardSet : tier.getRewards())
+                    {
+                        for(ItemStack item : rewardSet.getItems())
+                        {
+                            messages.add(ChatColor.AQUA + "Item " + ChatColor.GRAY + item.getTypeId() + ":"
+                                    + item.getDurability() + ChatColor.AQUA + ", quantity: "
+                                    + ChatColor.GRAY + item.getAmount());
+                        }
+                        messages.add(seperator);
+                    }
+                    messages.remove(messages.size() - 1);
+
+                    DynamicPage page = new DynamicPage(messages, 0, seperator);
+                    if(senderPageHashMap.containsKey(sender))
+                    {
+                        senderPageHashMap.replace(sender, page);
+                    }
+                    else
+                    {
+                        senderPageHashMap.put(sender, page);
+                    }
+                }
+                else if(args.length == 4 && VarCheck.isInteger(args[2]))
+                {
+                    if(args[3].equals("previous"))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).previous();
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else if(args[3].equals("next"))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).next();
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else if(VarCheck.isInteger(args[3]))
+                    {
+                        ArrayList<String> pageStrings = senderPageHashMap.get(sender).pageAt(Integer.parseInt(args[3]));
+                        for(String pageString : pageStrings)
+                        {
+                            sender.sendMessage(pageString);
+                        }
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "Invalid Syntax. Correct Syntax: " +
+                                "/gs rewardslist <region> <tier> <previous|next|page number>");
+                    }
+                }
                 return true;
             }
             else if(args[0].equals("help"))
