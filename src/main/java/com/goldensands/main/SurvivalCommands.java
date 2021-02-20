@@ -184,7 +184,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     if(region != null)
                     {
                         if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size()
-                                && region.getTiers().get(Integer.parseInt(args[2])).getRewards().size() > 0)
+                                && region.getTiers().get(Integer.parseInt(args[2]) - 1).getRewards().size() > 0)
                         {
                             Tier tier = region.getTiers().get(Integer.parseInt(args[2]) - 1);
                             String seperator = "---%%%---";
@@ -204,7 +204,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             page = new DynamicPage(messages, 0, seperator);
                         }
                         else if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size()
-                                && region.getTiers().get(Integer.parseInt(args[2])).getRewards().size() == 0)
+                                && region.getTiers().get(Integer.parseInt(args[2]) - 1).getRewards().size() == 0)
                         {
                             sender.sendMessage(ChatColor.RED + "This tier does not have any rewards set.");
                         }

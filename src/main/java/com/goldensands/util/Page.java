@@ -40,7 +40,7 @@ public abstract class Page
     public ArrayList<String> next()
     {
         ArrayList<String> page = new ArrayList<>();
-        if(currentPage > getMaxPages())
+        if(currentPage <= getMaxPages())
         {
             currentPage++;
             buildPage(currentPage, page);
@@ -56,7 +56,7 @@ public abstract class Page
     public ArrayList<String> pageAt(int pageNumber)
     {
         ArrayList<String> page = new ArrayList<>();
-        if(pageNumber >= getMaxPages())
+        if(pageNumber <= getMaxPages())
         {
             currentPage = pageNumber;
             buildPage(currentPage, page);
