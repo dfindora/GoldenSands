@@ -53,9 +53,9 @@ public class Region
     {
         for(ChestLocation chestLocation : locations)
         {
-            if((int)chestLocation.getLocation().getX() == (int)location.getX()
-                    && (int)chestLocation.getLocation().getY() == (int)location.getY()
-                    && (int)chestLocation.getLocation().getZ() == (int)location.getZ())
+            if(chestLocation.getLocation().getBlockX() == location.getBlockX()
+                    && chestLocation.getLocation().getBlockY() == location.getBlockY()
+                    && chestLocation.getLocation().getBlockZ() == location.getBlockZ())
             {
                 return chestLocation;
             }

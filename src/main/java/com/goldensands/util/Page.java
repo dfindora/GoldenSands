@@ -40,9 +40,10 @@ public abstract class Page
     public ArrayList<String> next()
     {
         ArrayList<String> page = new ArrayList<>();
-        if(currentPage <= getMaxPages())
+        if(currentPage < getMaxPages())
         {
             currentPage++;
+            page.add(ChatColor.AQUA + "Showing page " + currentPage + " of " + getMaxPages());
             buildPage(currentPage, page);
         }
         else
@@ -59,6 +60,7 @@ public abstract class Page
         if(pageNumber <= getMaxPages())
         {
             currentPage = pageNumber;
+            page.add(ChatColor.AQUA + "Showing page " + currentPage + " of " + getMaxPages());
             buildPage(currentPage, page);
         }
         else

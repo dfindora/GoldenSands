@@ -40,9 +40,9 @@ public class ChestLocation
     public ArrayList<Tier> getTiers()
     {
         ArrayList<Tier> tiers = new ArrayList<>();
-        for(int i = tierStart; i < tierEnd; i++)
+        for(int i = tierStart; i <= tierEnd; i++)
         {
-            tiers.add(region.getTiers().get(i));
+            tiers.add(region.getTiers().get(i - 1));
         }
         return tiers;
     }

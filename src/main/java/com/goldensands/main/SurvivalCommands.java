@@ -68,6 +68,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 {
                     sender.sendMessage(ChatColor.RED + "Region " + args[1] + " was not successfully deleted.");
                 }
+                return true;
             }
             //gs reset <region>
             else if(args[0].equals("reset"))
@@ -227,7 +228,6 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 //print and add to map of command senders
                 if(page != null)
                 {
-                    sender.sendMessage(ChatColor.AQUA + "Showing page " + 1 + " of " + page.getMaxPages());
                     for(String pageString : page.pageAt(1))
                     {
                         sender.sendMessage(pageString);
@@ -242,6 +242,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
+            //gs page <next|previous|page-number>
             else if(args[0].equals("page"))
             {
                 if(senderPageHashMap.containsKey(sender))
@@ -282,10 +283,12 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
+            //gs help
             else if(args[0].equals("help"))
             {
                 return true;
             }
+            //gs removeloc <region> <x> <y> <z>
             else if(args[0].equals("removeloc"))
             {
                 if(args.length == 5 && VarCheck.isInteger(args[2]) && VarCheck.isInteger(args[3])
@@ -310,9 +313,9 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         else
                         {
                             sender.sendMessage(ChatColor.RED + "the location ("
-                                    + chestLocation.getLocation().getBlockX() + ", "
-                                    + chestLocation.getLocation().getBlockY() + ", "
-                                    + chestLocation.getLocation().getBlockZ() + ") is not contained within the region "
+                                    + args[2] + ", "
+                                    + args[3] + ", "
+                                    + args[4] + ") is not contained within the region "
                                     + region.getName() + ".");
                         }
                     }
@@ -342,12 +345,13 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
                     if(region != null)
                     {
-                        if(Integer.parseInt(args[2]) >= 1 && Integer.parseInt(args[3])
+                        if(Integer.parseInt(args[2]) >= 1  && Integer.parseInt(args[2]) <= Integer.parseInt(args[3])
+                                && Integer.parseInt(args[3])
                                 <= region.getTiers().get(region.getTiers().size() - 1).getNumber())
                         {
                             Location location = ((Player) sender).getLocation();
-                            ChestLocation chestLocation = new ChestLocation(plugin.getRegionConfig().getRegionbyName(args[1]),
-                                    location, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+                            ChestLocation chestLocation = new ChestLocation(region, location, Integer.parseInt(args[2]),
+                                    Integer.parseInt(args[3]));
                             region.addLocation(chestLocation);
                             plugin.getRegionConfig().writeRegionsToFile();
                             sender.sendMessage(ChatColor.GREEN + "added location ("
@@ -360,10 +364,15 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         {
                             sender.sendMessage(ChatColor.RED + "the minimum tier must be at least 1.");
                         }
+                        else if (Integer.parseInt(args[2]) > Integer.parseInt(args[3]))
+                        {
+                            sender.sendMessage(ChatColor.RED + "the minimum tier must be less than or equal to "
+                                    + "the maximum tier.");
+                        }
                         else
                         {
                             sender.sendMessage(ChatColor.RED + "the maximum tier number cannot be greater than the "
-                                    + "maximum tier for this region, which is"
+                                    + "maximum tier for this region, which is "
                                     + region.getTiers().get(region.getTiers().size() - 1).getNumber() + ".");
                         }
                     }
