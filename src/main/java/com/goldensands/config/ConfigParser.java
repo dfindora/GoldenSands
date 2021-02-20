@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -168,6 +169,21 @@ public class ConfigParser
             e.printStackTrace();
             System.err.println("File path: " + dir + File.separator + regionName  + ".json");
         }
+    }
+
+    public boolean deleteRegionFile(String regionName)
+    {
+        Region region = getRegionbyName(regionName);
+        regions.remove(region);
+        try
+        {
+            File file = new File(dirString + File.separator + regionName  + ".json");
+            return Files.deleteIfExists(file.toPath());
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public ArrayList<Region> getRegions()

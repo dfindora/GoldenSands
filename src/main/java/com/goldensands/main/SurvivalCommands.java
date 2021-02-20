@@ -7,6 +7,7 @@ import com.goldensands.config.Region;
 import com.goldensands.config.RewardSet;
 import com.goldensands.config.Tier;
 import com.goldensands.util.DynamicPage;
+import com.google.gson.internal.$Gson$Preconditions;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -55,6 +56,19 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             + " addregion <name> <max-tiers>");
                 }
                 return true;
+            }
+            //gs removeregion <region>
+            if(args[0].equals("removeregion"))
+            {
+                boolean deleted = plugin.getRegionConfig().deleteRegionFile(args[1]);
+                if(deleted)
+                {
+                    sender.sendMessage(ChatColor.GREEN + "Region " + args[1] + " successfully deleted.");
+                }
+                else
+                {
+                    sender.sendMessage(ChatColor.RED + "Region " + args[1] + " was not successfully deleted.");
+                }
             }
             //gs reset <region>
             else if(args[0].equals("reset"))
