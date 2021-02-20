@@ -40,8 +40,8 @@ public class SurvivalCommands implements Listener, CommandExecutor
         //main command
         if(command.getName().toLowerCase().equals(main) && sender.hasPermission(command.getPermission()))
         {
-            //gs create <name> <max-tiers>
-            if(args[0].equals("create"))
+            //gs addregion <name> <max-tiers>
+            if(args[0].equals("addregion"))
             {
                 if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
@@ -52,7 +52,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 else
                 {
                     sender.sendMessage(ChatColor.RED + "Invalid syntax. Correct Syntax: /" + command.getName()
-                            + " create <name> <max-tiers>");
+                            + " addregion <name> <max-tiers>");
                 }
                 return true;
             }
