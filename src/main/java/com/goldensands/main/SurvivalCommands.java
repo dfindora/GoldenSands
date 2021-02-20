@@ -20,7 +20,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import com.goldensands.util.VarCheck;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,6 +40,7 @@ public class SurvivalCommands implements Listener, CommandExecutor
         //main command
         if(command.getName().toLowerCase().equals(main) && sender.hasPermission(command.getPermission()))
         {
+            //gs create <name> <max-tiers>
             if(args[0].equals("create"))
             {
                 if(args.length == 3 && VarCheck.isInteger(args[2]))
@@ -56,59 +56,62 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
+            //gs reset <region>
             else if(args[0].equals("reset"))
             {
                 if(args.length == 2)
                 {
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
-                    for(ChestLocation chestLocation : region.getLocations())
+                    if(region != null && !region.areAllTiersEmpty())
                     {
-                        Location location = chestLocation.getLocation();
-                        location.getBlock().setType(Material.CHEST);
-                        Chest chest = (Chest)location.getBlock().getState();
-                        if(!hasEmptyInventory(chest))
+                        if(region.getLocations().size() > 0)
                         {
-                            chest.getInventory().clear();
-                        }
-                        int[] tierNums = new int[100];
-                        for(int i = 0; i < 100; i++)
-                        {
-                            tierNums[i] = (int)(Math.random() * (chestLocation.getTiers().size()));
-                        }
+                            for (ChestLocation chestLocation : region.getLocations())
+                            {
+                                Location location = chestLocation.getLocation();
+                                location.getBlock().setType(Material.CHEST);
+                                Chest chest = (Chest) location.getBlock().getState();
+                                if (!hasEmptyInventory(chest))
+                                {
+                                    chest.getInventory().clear();
+                                }
 
-                        int[] rewardNums = new int[100];
-                        for(int i = 0; i < 100; i++)
-                        {
-                            rewardNums[i] = (int)(Math.random() * (chestLocation.getTiers().get(tierNums[0]).getRewards().size()));
-                        }
-                        StringBuilder tnPrint = new StringBuilder("TierNums(" + chestLocation.getTiers().size() + "): [");
-                        for(int tierNum : tierNums)
-                        {
-                            tnPrint.append(tierNum).append(", ");
-                        }
-                        tnPrint.append("]");
-                        System.out.println(tnPrint.toString());
+                                Tier tier = null;
+                                int tierNum = -1;
+                                while (tierNum < 0 || tier.getRewards().size() == 0)
+                                {
+                                    tierNum = (int) (Math.random() * (chestLocation.getTiers().size()));
+                                    tier = chestLocation.getTiers().get(tierNum);
+                                }
 
-                        StringBuilder rnPrint = new StringBuilder("RewardNums(" + tierNums[0] + ", "
-                                + chestLocation.getTiers().get(tierNums[0]).getRewards().size() + "): [");
-                        for(int rewardNum : rewardNums)
-                        {
-                            rnPrint.append(rewardNum).append(", ");
+                                int rewardNum = (int) (Math.random() * (tier.getRewards().size()));
+                                RewardSet chestInv = tier.getRewards().get(rewardNum);
+                                for (ItemStack item : chestInv.getItems())
+                                {
+                                    chest.getInventory().addItem(item);
+                                }
+                            }
                         }
-                        rnPrint.append("]");
-                        System.out.println(rnPrint.toString());
-
-                        RewardSet chestInv = chestLocation.getTiers().get(tierNums[0]).getRewards().get(rewardNums[0]);
-                        for(ItemStack item : chestInv.getItems())
+                        else
                         {
-                            chest.getInventory().addItem(item);
+                            sender.sendMessage(ChatColor.RED + "Region " + region.getName() + " does not have any"
+                            + " locations set, so there is nothing to reset.");
                         }
+                    }
+                    else if(region != null && region.areAllTiersEmpty())
+                    {
+                        sender.sendMessage(ChatColor.RED + "Region " + region.getName() + " does not have any "
+                                + "rewards set for any tiers, so there is nothing to reset.");
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
                     }
                 }
                 else
                 {
                     sender.sendMessage(ChatColor.RED + "Invalid syntax. Correct Syntax: /" + command.getName()
-                            + " reset <name>");
+                            + " reset <region>");
                 }
                 return true;
             }
@@ -124,58 +127,88 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     {
                         regions.add(ChatColor.GRAY + region.getName());
                     }
-                    page = new FixedPage(regions, 5);
+                    if(regions.size() > 0)
+                    {
+                        page = new FixedPage(regions, 5);
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "No regions have been created yet.");
+                    }
                 }
                 //gs list <region> - list tier range first, then all locations within a region
                 else if (args.length == 2)
                 {
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
-                    sender.sendMessage(ChatColor.YELLOW + "Locations for " + region.getName() + " tiers "
-                            + region.getTiers().get(0).getNumber() + " to "
-                            + region.getTiers().get(region.getTiers().size() - 1).getNumber());
-
-                    //build list
-                    ArrayList<String> locations = new ArrayList<>();
-                    for (ChestLocation chestLocation : region.getLocations())
+                    if(region != null)
                     {
-                        Location location = chestLocation.getLocation();
-                        locations.add(ChatColor.YELLOW + "(" + location.getX() + ", " + location.getY() + ", "
-                                + location.getZ() + ")");
+                        sender.sendMessage(ChatColor.YELLOW + "Locations for " + region.getName() + " tiers "
+                                + region.getTiers().get(0).getNumber() + " to "
+                                + region.getTiers().get(region.getTiers().size() - 1).getNumber());
+
+                        //build list
+                        ArrayList<String> locations = new ArrayList<>();
+                        for (ChestLocation chestLocation : region.getLocations())
+                        {
+                            Location location = chestLocation.getLocation();
+                            locations.add(ChatColor.YELLOW + "(" + location.getX() + ", " + location.getY() + ", "
+                                    + location.getZ() + ")");
+                        }
+                        page = new FixedPage(locations, 5);
                     }
-                    page = new FixedPage(locations, 5);
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
+                    }
                 }
                 //gs list <region> <tier> - list rewardsets
                 else if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
                     //build list
-                    Tier tier = plugin.getRegionConfig().getRegionbyName(args[1]).getTiers()
-                            .get(Integer.parseInt(args[2]));
-                    String seperator = "---%%%---";
-                    ArrayList<String> messages = new ArrayList<>();
-                    for(RewardSet rewardSet : tier.getRewards())
+                    Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                    if(region != null)
                     {
-                        for(ItemStack item : rewardSet.getItems())
+                        if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size())
                         {
-                            messages.add(ChatColor.AQUA + "Item " + ChatColor.GRAY + item.getTypeId() + ":"
-                                    + item.getDurability() + ChatColor.AQUA + ", quantity: "
-                                    + ChatColor.GRAY + item.getAmount());
-                        }
-                        messages.add(seperator);
-                    }
-                    messages.remove(messages.size() - 1);
+                            Tier tier = region.getTiers().get(Integer.parseInt(args[2]));
+                            String seperator = "---%%%---";
+                            ArrayList<String> messages = new ArrayList<>();
+                            for (RewardSet rewardSet : tier.getRewards())
+                            {
+                                for (ItemStack item : rewardSet.getItems())
+                                {
+                                    messages.add(ChatColor.AQUA + "Item " + ChatColor.GRAY + item.getTypeId() + ":"
+                                            + item.getDurability() + ChatColor.AQUA + ", quantity: "
+                                            + ChatColor.GRAY + item.getAmount());
+                                }
+                                messages.add(seperator);
+                            }
+                            messages.remove(messages.size() - 1);
 
-                    page = new DynamicPage(messages, 0, seperator);
+                            page = new DynamicPage(messages, 0, seperator);
+                        }
+                        else
+                        {
+                            sender.sendMessage(ChatColor.RED + "The tier provided is not within this region's tier "
+                                    + "range. The tier must be between 1 and " + region.getTiers().size() + ".");
+                        }
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
+                    }
                 }
                 else
                 {
                     sender.sendMessage(ChatColor.RED + "Invalid Syntax. Correct Syntax: " +
                             "/gs list <region> <tier>");
                 }
+                //print and add to map of command senders
                 if(page != null)
                 {
+                    sender.sendMessage(ChatColor.AQUA + "Showing page " + 1 + " of " + page.getMaxPages());
                     for(String pageString : page.pageAt(1))
                     {
-                        System.out.println("string: " + pageString);
                         sender.sendMessage(pageString);
                     }
                     if (senderPageHashMap.containsKey(sender))
@@ -247,15 +280,24 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         {
                             region.removeLocation(chestLocation);
                             plugin.getRegionConfig().writeRegionsToFile();
+                            sender.sendMessage(ChatColor.GREEN + "Removed location ("
+                                    + chestLocation.getLocation().getBlockX() + ", "
+                                    + chestLocation.getLocation().getBlockY() + ", "
+                                    + chestLocation.getLocation().getBlockZ() + ") from region "
+                                    + region.getName() + ".");
                         }
                         else
                         {
-                            sender.sendMessage(ChatColor.RED + "This location is not contained within the region.");
+                            sender.sendMessage(ChatColor.RED + "the location ("
+                                    + chestLocation.getLocation().getBlockX() + ", "
+                                    + chestLocation.getLocation().getBlockY() + ", "
+                                    + chestLocation.getLocation().getBlockZ() + ") is not contained within the region "
+                                    + region.getName() + ".");
                         }
                     }
                     else
                     {
-                        sender.sendMessage(ChatColor.RED + "Invalid Region.");
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
                     }
                 }
                 else
@@ -271,15 +313,43 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 sender.sendMessage(ChatColor.RED + "This command can only be used by players!");
                 return true;
             }
+            //gs addloc <region> <tier-start> <tier-end>
             else if(args[0].equals("addloc"))
             {
                 if(args.length == 4 && VarCheck.isInteger(args[2]) && VarCheck.isInteger(args[3]))
                 {
-                    Location location = ((Player)sender).getLocation();
-                    ChestLocation chestLocation = new ChestLocation(plugin.getRegionConfig().getRegionbyName(args[1]),
-                            location, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-                    plugin.getRegionConfig().getRegionbyName(args[1]).addLocation(chestLocation);
-                    plugin.getRegionConfig().writeRegionsToFile();
+                    Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                    if(region != null)
+                    {
+                        if(Integer.parseInt(args[2]) >= 1 && Integer.parseInt(args[3])
+                                <= region.getTiers().get(region.getTiers().size() - 1).getNumber())
+                        {
+                            Location location = ((Player) sender).getLocation();
+                            ChestLocation chestLocation = new ChestLocation(plugin.getRegionConfig().getRegionbyName(args[1]),
+                                    location, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+                            region.addLocation(chestLocation);
+                            plugin.getRegionConfig().writeRegionsToFile();
+                            sender.sendMessage(ChatColor.GREEN + "added location ("
+                                    + chestLocation.getLocation().getBlockX() + ", "
+                                    + chestLocation.getLocation().getBlockY() + ", "
+                                    + chestLocation.getLocation().getBlockZ() + ") to region "
+                                    + region.getName() + ".");
+                        }
+                        else if(Integer.parseInt(args[2]) < 1)
+                        {
+                            sender.sendMessage(ChatColor.RED + "the minimum tier must be at least 1.");
+                        }
+                        else
+                        {
+                            sender.sendMessage(ChatColor.RED + "the maximum tier number cannot be greater than the "
+                                    + "maximum tier for this region, which is"
+                                    + region.getTiers().get(region.getTiers().size() - 1).getNumber() + ".");
+                        }
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
+                    }
                 }
                 else
                 {
@@ -288,25 +358,87 @@ public class SurvivalCommands implements Listener, CommandExecutor
                 }
                 return true;
             }
+            //gs removereward <region> <tier> <index>
+            else if(args[0].equals("removereward"))
+            {
+                if(args.length == 4 && VarCheck.isInteger(args[2]) && VarCheck.isInteger(args[3]))
+                {
+                    Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                    if(region != null)
+                    {
+                        if(Integer.parseInt(args[2]) <= region.getTiers().size())
+                        {
+                            Tier tier = region.getTiers().get(Integer.parseInt(args[2]) - 1);
+                            if(Integer.parseInt(args[3]) <= tier.getRewards().size())
+                            {
+                                tier.getRewards().remove(Integer.parseInt(args[3]) - 1);
+                                sender.sendMessage(ChatColor.GREEN + "removed the reward set from tier "
+                                        + tier.getNumber() + " in region " + region.getName() + ".");
+                            }
+                            else
+                            {
+                                sender.sendMessage(ChatColor.RED + "The reward index exceeded the number of rewards" +
+                                        "for this tier. This tier contains " + tier.getRewards().size() + " rewards.");
+                            }
+                        }
+                        else
+                        {
+                            sender.sendMessage(ChatColor.RED + "tier " + args[2] + " does not exist. This region's" +
+                                    "max tier is " + region.getTiers().get(region.getTiers().size() - 1).getNumber() + ".");
+                        }
+                    }
+                    else
+                    {
+                        sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
+                    }
+                }
+                else
+                {
+                    sender.sendMessage(ChatColor.RED + "Invalid syntax. Correct Syntax: /" + command.getName()
+                            + " removereward <region> <tier> <index>");
+                }
+
+                return true;
+            }
+            //gs addreward <region> <tier>
             else if(args[0].equals("addreward"))
             {
                 if(args.length == 3 && VarCheck.isInteger(args[2]))
                 {
                     if(!hasEmptyInventory((Player)sender))
                     {
-                        ArrayList<ItemStack> items = new ArrayList<>();
-                        for(ItemStack item : ((Player)sender).getInventory().getContents())
+                        Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
+                        if(region != null)
                         {
-                            if(item != null)
+                            if(Integer.parseInt(args[2]) <= region.getTiers().size())
                             {
-                                items.add(item);
+                                Tier tier = region.getTiers().get(Integer.parseInt(args[2]) - 1);
+                                ArrayList<ItemStack> items = new ArrayList<>();
+                                for (ItemStack item : ((Player) sender).getInventory().getContents())
+                                {
+                                    if (item != null)
+                                    {
+                                        items.add(item);
+                                    }
+                                }
+                                RewardSet rewardSet = new RewardSet(items);
+
+                                tier.addRewards(rewardSet);
+                                plugin.getRegionConfig().writeRegionsToFile();
+                                sender.sendMessage(ChatColor.GREEN + "added the reward set from tier "
+                                        + tier.getNumber() + " in region " + region.getName() + ".");
+                            }
+                            else
+                            {
+                                sender.sendMessage(ChatColor.RED + "tier " + args[2] + " does not exist. This "
+                                        + "region's max tier is "
+                                        + region.getTiers().get(region.getTiers().size() - 1).getNumber() + ".");
                             }
                         }
-                        RewardSet rewardSet = new RewardSet(items);
-
-                        plugin.getRegionConfig().getRegionbyName(args[1]).getTiers()
-                                .get(Integer.parseInt(args[2]) - 1).addRewards(rewardSet);
-                        plugin.getRegionConfig().writeRegionsToFile();
+                        else
+                        {
+                            sender.sendMessage(ChatColor.RED + "region " + args[1] + " not found.");
+                        }
                     }
                     else
                     {

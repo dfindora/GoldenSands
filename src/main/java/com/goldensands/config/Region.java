@@ -68,6 +68,18 @@ public class Region
         return tiers;
     }
 
+    public boolean areAllTiersEmpty()
+    {
+        for(Tier tier : tiers)
+        {
+            if(tier.getRewards().size() > 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addLocation(ChestLocation location)
     {
         locations.add(location);

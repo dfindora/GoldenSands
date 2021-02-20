@@ -19,7 +19,7 @@ public class FixedPage extends Page
     }
 
     @Override
-    int getMaxPages()
+    public int getMaxPages()
     {
         return (int)Math.ceil((double)entries.size() / (double)pageLength);
     }

@@ -71,5 +71,5 @@ public abstract class Page
 
     abstract void buildPage(int pageNumber, ArrayList<String> page);
 
-    abstract int getMaxPages();
+    public abstract int getMaxPages();
 }
