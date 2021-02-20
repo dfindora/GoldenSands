@@ -47,7 +47,7 @@ public class DynamicPage extends Page
     @Override
     public int getMaxPages()
     {
-        int numEntries = 0;
+        int numEntries = 1;
         for(String entry : entries)
         {
             if(entry.equals(seperator))
