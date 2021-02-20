@@ -164,8 +164,10 @@ public class SurvivalCommands implements Listener, CommandExecutor
                         for (ChestLocation chestLocation : region.getLocations())
                         {
                             Location location = chestLocation.getLocation();
-                            locations.add(ChatColor.YELLOW + "(" + location.getX() + ", " + location.getY() + ", "
-                                    + location.getZ() + ")");
+                            locations.add(ChatColor.YELLOW + "("
+                                    + location.getBlockX() + ", "
+                                    + location.getBlockY() + ", "
+                                    + location.getBlockZ() + ")");
                         }
                         page = new FixedPage(locations, 5);
                     }
