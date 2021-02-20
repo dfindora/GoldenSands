@@ -7,7 +7,6 @@ import com.goldensands.config.Region;
 import com.goldensands.config.RewardSet;
 import com.goldensands.config.Tier;
 import com.goldensands.util.DynamicPage;
-import com.google.gson.internal.$Gson$Preconditions;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -182,9 +181,10 @@ public class SurvivalCommands implements Listener, CommandExecutor
                     Region region = plugin.getRegionConfig().getRegionbyName(args[1]);
                     if(region != null)
                     {
-                        if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size())
+                        if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size()
+                                && region.getTiers().get(Integer.parseInt(args[2])).getRewards().size() > 0)
                         {
-                            Tier tier = region.getTiers().get(Integer.parseInt(args[2]));
+                            Tier tier = region.getTiers().get(Integer.parseInt(args[2]) - 1);
                             String seperator = "---%%%---";
                             ArrayList<String> messages = new ArrayList<>();
                             for (RewardSet rewardSet : tier.getRewards())
@@ -200,6 +200,11 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             messages.remove(messages.size() - 1);
 
                             page = new DynamicPage(messages, 0, seperator);
+                        }
+                        else if(Integer.parseInt(args[2]) > 0 && Integer.parseInt(args[2]) <= region.getTiers().size()
+                                && region.getTiers().get(Integer.parseInt(args[2])).getRewards().size() == 0)
+                        {
+                            sender.sendMessage(ChatColor.RED + "This tier does not have any rewards set.");
                         }
                         else
                         {
@@ -386,13 +391,14 @@ public class SurvivalCommands implements Listener, CommandExecutor
                             if(Integer.parseInt(args[3]) <= tier.getRewards().size())
                             {
                                 tier.getRewards().remove(Integer.parseInt(args[3]) - 1);
+                                plugin.getRegionConfig().writeRegionsToFile();
                                 sender.sendMessage(ChatColor.GREEN + "removed the reward set from tier "
                                         + tier.getNumber() + " in region " + region.getName() + ".");
                             }
                             else
                             {
                                 sender.sendMessage(ChatColor.RED + "The reward index exceeded the number of rewards" +
-                                        "for this tier. This tier contains " + tier.getRewards().size() + " rewards.");
+                                        " for this tier. This tier contains " + tier.getRewards().size() + " rewards.");
                             }
                         }
                         else
